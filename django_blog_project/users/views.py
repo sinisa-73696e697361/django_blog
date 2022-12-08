@@ -4,15 +4,32 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
-from .forms import CustomUserCreationForm, ProfileForm, SkillForm
+from .forms import CustomUserCreationForm, ProfileForm, SkillForm, Skill
+from django.db.models import Q
 
 
 def profiles(request):
-    profiles = Profile.objects.all()
-    context = {'profiles': profiles}
+    search_query = ''
+
+    if request.GET.get('search_query'):
+        search_query = request.GET.get('search_query')
+
+    skills = Skill.objects.filter(name__icontains=search_query)
+
+    profiles = Profile.objects.distinct().filter(
+        Q(name__icontains=search_query) |
+        Q(short_intro__icontains=search_query) |
+        Q(skill__in=skills))
+
+    context = {
+        'profiles': profiles,
+        'search_query': search_query
+    }
+
     return render(request, 'users/profiles.html', context)
 
+    context = {'profiles': profiles, 'search_query': search_query}
+    return render(request, 'users/profiles.html', context)
 
 def userProfile(request, pk):
     profile = Profile.objects.get(id=pk)
@@ -112,6 +129,7 @@ def createSkill(request):
 
     context = {'form': form}
     return render(request, 'users/skill_form.html', context)
+
 
 @login_required(login_url='login')
 def createSkill(request):
