@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import CustomUserCreationForm, ProfileForm, SkillForm, Skill
 from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def profiles(request):
@@ -21,14 +22,35 @@ def profiles(request):
         Q(short_intro__icontains=search_query) |
         Q(skill__in=skills))
 
+    page = request.GET.get('page', 1)
+    paginator = Paginator(profiles, 6)
+
+    try:
+        profiles = paginator.get_page(page)
+    except PageNotAnInteger:
+        page = 1
+    except EmptyPage:
+        page = paginator.num_pages
+
+    leftIndex = (int(page) - 2)
+
+    if leftIndex < 1:
+        leftIndex = 1
+
+    rightIndex = (int(page) + 3)
+
+    if rightIndex > paginator.num_pages:
+        rightIndex = paginator.num_pages + 1
+
+    custom_range = range(leftIndex, rightIndex)
+
     context = {
         'profiles': profiles,
-        'search_query': search_query
+        'search_query': search_query,
+        'custom_range': custom_range
+
     }
 
-    return render(request, 'users/profiles.html', context)
-
-    context = {'profiles': profiles, 'search_query': search_query}
     return render(request, 'users/profiles.html', context)
 
 def userProfile(request, pk):

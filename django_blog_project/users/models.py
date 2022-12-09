@@ -25,6 +25,9 @@ class Profile(models.Model):
     def __str__(self):
         return str(self.user.username)
 
+    class Meta:
+        ordering = ['-created']
+
 
 class Skill(models.Model):
     owner = models.ForeignKey(Profile, null=True, blank=True, on_delete=models.CASCADE)

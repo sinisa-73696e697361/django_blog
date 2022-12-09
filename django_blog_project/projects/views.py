@@ -18,12 +18,11 @@ def projects(request):
 
     projects = Project.objects.distinct().filter(
         Q(title__icontains=search_query) |
-        Q(description__icontains=search_query) |
         Q(owner__name__icontains=search_query) |
         Q(tags__in=tags))
 
     page = request.GET.get('page', 1)
-    paginator = Paginator(projects, 1)
+    paginator = Paginator(projects, 6)
 
     try:
         projects = paginator.get_page(page)
@@ -32,12 +31,12 @@ def projects(request):
     except EmptyPage:
         page = paginator.num_pages
 
-    leftIndex = (int(page) - 4)
+    leftIndex = (int(page) - 2)
 
     if leftIndex < 1:
         leftIndex = 1
 
-    rightIndex = (int(page) + 5)
+    rightIndex = (int(page) + 3)
 
     if rightIndex > paginator.num_pages:
         rightIndex = paginator.num_pages + 1
