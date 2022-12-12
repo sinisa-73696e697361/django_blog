@@ -53,6 +53,7 @@ def profiles(request):
 
     return render(request, 'users/profiles.html', context)
 
+
 def userProfile(request, pk):
     profile = Profile.objects.get(id=pk)
     topSkills = profile.skill_set.exclude(description__exact='')
@@ -200,6 +201,7 @@ def deleteSkill(request, pk):
     context = {'object': skill}
     return render(request, 'delete_template.html', context)
 
+
 @login_required(login_url='login')
 def inbox(request):
     profile = request.user.profile
@@ -219,11 +221,15 @@ def viewMessage(request, pk):
     context = {'message': message}
     return render(request, 'users/message.html', context)
 
-@login_required(login_url='login')
+
 def createMessage(request, pk):
     recipient = Profile.objects.get(id=pk)
     form = MessageForm()
-    sender = request.user.profile
+
+    try:
+        sender = request.user.profile
+    except:
+        sender = None
 
     if request.method == 'POST':
         form = MessageForm(request.POST)
